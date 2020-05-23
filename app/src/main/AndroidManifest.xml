@@ -22,7 +22,7 @@
         android:theme="@style/AppTheme">
         <meta-data android:name="com.amap.api.v2.apikey" android:value="903c999f35ea4889aa0ce7b81eb212f1">
         </meta-data>
-        <activity android:name=".SplashActivity"
+        <activity android:name=".MainActivity"
             android:windowSoftInputMode="adjustPan"
             >
             <intent-filter>
@@ -31,7 +31,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity"
+        <activity android:name=".SplashActivity"
             android:windowSoftInputMode="adjustPan"
             ></activity>
         <activity android:name=".LoginActivity"></activity>

@@ -17,15 +17,16 @@ import android.widget.TextView;
 import com.amap.api.location.AMapLocation;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.AMapUtils;
+import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.LatLngBounds;
 import com.amap.api.maps.model.PolylineOptions;
 import com.step.counting.MainActivity;
 import com.step.counting.R;
 import com.step.counting.bean.Step;
 import com.step.counting.bean.User;
 import com.step.counting.data.DBManger;
-import com.step.counting.data.StepMgr;
 import com.step.counting.navi.LocationMgr;
 import com.step.counting.util.DateUtil;
 
@@ -84,7 +85,7 @@ public class TodayFragment extends Fragment {
      * 绘制运动路线
      */
     public void drawLines(Step mTodayStep) {
-
+        mAMap.clear();
         String locations = mTodayStep.getLOCATIONS();
         String[] gpsData = locations.split("-");
         ArrayList<LatLng> latlngList_path = new ArrayList<LatLng>();
@@ -94,14 +95,15 @@ public class TodayFragment extends Fragment {
             double lon = Double.parseDouble(gps[1]);
             LatLng latLng = new LatLng(lat,lon);
             latlngList_path.add(latLng);
-
-
         }
         if (latlngList_path.size()>0){
             PolylineOptions options = new PolylineOptions();
             options.addAll(latlngList_path);
             options.width(10).geodesic(true).color(Color.GREEN);
             mAMap.addPolyline(options);
+
+            LatLng latLng = latlngList_path.get(0);
+            mAMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latLng.latitude, latLng.longitude), 15));
         }
 
     }

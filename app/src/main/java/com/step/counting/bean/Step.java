@@ -38,4 +38,15 @@ public class Step {
     public void setLOCATIONS(String LOCATIONS) {
         this.LOCATIONS = LOCATIONS;
     }
+
+    public Step(){
+
+    }
+
+    public Step(String STEP_ID,String DATE,String STEP_NUM,String LOCATIONS){
+        this.setSTEP_ID(STEP_ID);
+        this.setDATE(DATE);
+        this.setSTEP_NUM(STEP_NUM);
+        this.setLOCATIONS(LOCATIONS);
+    }
 }

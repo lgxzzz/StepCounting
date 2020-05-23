@@ -9,6 +9,7 @@ import android.os.Message;
 
 import com.step.counting.bean.Step;
 import com.step.counting.bean.User;
+import com.step.counting.util.DateUtil;
 import com.step.counting.util.SharedPreferenceUtil;
 
 import java.text.ParseException;
@@ -23,7 +24,6 @@ public class DBManger {
     private Context mContext;
     private SQLiteDbHelper mDBHelper;
     public User mUser;
-    public StepMgr mStepMgr;
     public static  DBManger instance;
 
     public static DBManger getInstance(Context mContext){
@@ -36,8 +36,10 @@ public class DBManger {
     public DBManger(final Context mContext){
         this.mContext = mContext;
         mDBHelper = new SQLiteDbHelper(mContext);
-        mStepMgr = new StepMgr(mContext);
-
+        if (SharedPreferenceUtil.getFirstTimeUse(mContext)){
+            createDefaultSteps();
+            SharedPreferenceUtil.setFirstTimeUse(false,mContext);
+        }
     }
 
 
@@ -154,7 +156,7 @@ public class DBManger {
         try{
             SQLiteDatabase db = mDBHelper.getWritableDatabase();
             ContentValues values = new ContentValues();
-            values.put("STEP_ID",step.getSTEP_ID());
+            values.put("STEP_ID",getRandomStep_ID());
             values.put("DATE",step.getDATE());
             values.put("STEP_NUM",step.getSTEP_NUM());
             values.put("LOCATIONS",step.getLOCATIONS());
@@ -208,7 +210,7 @@ public class DBManger {
         List<Step> mSteps = new ArrayList<>();
         try{
             SQLiteDatabase db = mDBHelper.getWritableDatabase();
-            Cursor cursor = db.query(SQLiteDbHelper.TAB_USER,null,null,null,null,null,null);
+            Cursor cursor = db.query(SQLiteDbHelper.TAB_STEP,null,null,null,null,null,null);
             while (cursor.moveToNext()){
                 String STEP_ID = cursor.getString(cursor.getColumnIndex("STEP_ID"));
                 String DATE = cursor.getString(cursor.getColumnIndex("DATE"));
@@ -231,6 +233,15 @@ public class DBManger {
     //生成随机userid
     public String getRandomUSER_ID(){
         String strRand="LF" ;
+        for(int i=0;i<10;i++){
+            strRand += String.valueOf((int)(Math.random() * 10)) ;
+        }
+        return strRand;
+    }
+
+    //生成随机userid
+    public String getRandomStep_ID(){
+        String strRand="T" ;
         for(int i=0;i<10;i++){
             strRand += String.valueOf((int)(Math.random() * 10)) ;
         }
@@ -263,5 +274,16 @@ public class DBManger {
         public void onError(String error);
     };
 
+    public void createDefaultSteps(){
+        Step step1 = new Step(getRandomStep_ID(), "2020年5月19日","9586","34.19756,108.86557-34.197666,108.865034-34.195987,108.866503-34.19559,108.8643-34.1966500000,108.8645600000-34.1962500000,108.8650100000-34.1958100000,108.8640800000-34.1964910000,108.8641510000-34.1944820000,108.8651110000-34.1945400000,108.8683700000");
+        Step step2 = new Step(getRandomStep_ID(), "2020年5月20日","19586","34.19756,108.86557-34.197666,108.865034-34.195987,108.866503-34.19559,108.8643-34.1966500000,108.8645600000-34.1962500000,108.8650100000-34.1958100000,108.8640800000-34.1964910000,108.8641510000-34.1944820000,108.8651110000-34.1945400000,108.8683700000");
+        Step step3 = new Step(getRandomStep_ID(), "2020年5月21日","7520","34.19756,108.86557-34.197666,108.865034-34.195987,108.866503-34.19559,108.8643-34.1966500000,108.8645600000-34.1962500000,108.8650100000-34.1958100000,108.8640800000-34.1964910000,108.8641510000-34.1944820000,108.8651110000-34.1945400000,108.8683700000");
+        Step step4 = new Step(getRandomStep_ID(), "2020年5月23日","13004","34.19756,108.86557-34.197666,108.865034-34.195987,108.866503-34.19559,108.8643-34.1966500000,108.8645600000-34.1962500000,108.8650100000-34.1958100000,108.8640800000-34.1964910000,108.8641510000-34.1944820000,108.8651110000-34.1945400000,108.8683700000");
+
+        insertStep(step1);
+        insertStep(step2);
+        insertStep(step3);
+        insertStep(step4);
+    }
 
 }

@@ -81,7 +81,7 @@ public class HistoryFragment extends Fragment {
 
         ArrayList<BarEntry> values = new ArrayList<>();
         List<Step> mSteps = DBManger.getInstance(getContext()).getAllSteps();
-        for (int i=1;i<=mSteps.size();i++){
+        for (int i=0;i<mSteps.size();i++){
             Step step = mSteps.get(i);
             int number = Integer.parseInt(step.getSTEP_NUM());
             BarEntry barEntry = new BarEntry(i,number);

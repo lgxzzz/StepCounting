@@ -23,6 +23,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 
+import com.amap.api.maps.model.LatLng;
 import com.step.counting.bean.Step;
 import com.step.counting.constant.Constant;
 import com.step.counting.data.DBManger;
@@ -58,9 +59,6 @@ public class StepService extends Service implements SensorEventListener {
     private int hasStepCount;
     //下次记录之前的步数
     private int previousStepCount;
-    private Notification.Builder builder;
-    private NotificationManager notificationManager;
-    private Intent nfIntent;
 
     //定位服务
     public LocationMgr locationMgr;
@@ -86,29 +84,6 @@ public class StepService extends Service implements SensorEventListener {
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        /**
-         * 此处设将Service为前台，不然当APP结束以后很容易被GC给干掉，这也就是大多数音乐播放器会在状态栏设置一个
-         * 原理大都是相通的
-         */
-        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        //获取一个Notification构造器
-        builder = new Notification.Builder(this.getApplicationContext());
-        /**
-         * 设置点击通知栏打开的界面，此处需要注意了，如果你的计步界面不在主界面，则需要判断app是否已经启动，
-         * 再来确定跳转页面，这里面太多坑，（别问我为什么知道 - -）
-         * 总之有需要的可以和我交流
-         */
-        nfIntent = new Intent(this, MainActivity.class);
-        builder.setContentIntent(PendingIntent.getActivity(this, 0, nfIntent, 0)) // 设置PendingIntent
-                .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.mipmap.ic_launcher)) // 设置下拉列表中的图标(大图标)
-                .setContentTitle("今日步数"+CURRENT_STEP+"步") // 设置下拉列表里的标题
-                .setSmallIcon(R.mipmap.ic_launcher) // 设置状态栏内的小图标
-                .setContentText("加油，要记得勤加运动"); // 设置上下文内容
-        // 获取构建好的Notification
-        Notification stepNotification = builder.build();
-        notificationManager.notify(110,stepNotification);
-        // 参数一：唯一的通知标识；参数二：通知消息。
-        startForeground(110, stepNotification);// 开始前台服务
         return START_STICKY;
     }
     /**
@@ -306,36 +281,35 @@ public class StepService extends Service implements SensorEventListener {
         }
     }
     /**
-     * 保存当天的数据到数据库中，并去刷新通知栏
+     * 保存当天的数据到数据库中
      */
     private void saveStepData() {
-        //查询数据库中的数据
-        Step entity = DBManger.getInstance(this).getStepByDate(CURRENT_DATE);
-        //为空则说明还没有该天的数据，有则说明已经开始当天的计步了
-        if (entity == null) {
-            //没有则新建一条数据
-            entity = new Step();
-            entity.setDATE(CURRENT_DATE);
-            entity.setSTEP_NUM(String.valueOf(CURRENT_STEP));
-            entity.setLOCATIONS(locationMgr.getmCurrentPosition().toString());
-            DBManger.getInstance(this).insertStep(entity);
-        } else {
-            //有则更新当前的数据
-            entity.setSTEP_NUM(String.valueOf(CURRENT_STEP));
-            String location = entity.getLOCATIONS();
-            location = location +"-"+locationMgr.getmCurrentPosition().toString();
-            entity.setLOCATIONS(location);
-            DBManger.getInstance(this).updateStep(entity);
+        LatLng position = locationMgr.getmCurrentPosition();
+        if (position!=null){
+            String gps = position.latitude+","+position.longitude;
+            //查询数据库中的数据
+            Step entity = DBManger.getInstance(this).getStepByDate(CURRENT_DATE);
+            //为空则说明还没有该天的数据，有则说明已经开始当天的计步了
+            if (entity == null) {
+                //没有则新建一条数据
+                entity = new Step();
+                entity.setDATE(CURRENT_DATE);
+                entity.setSTEP_NUM(String.valueOf(CURRENT_STEP));
+                entity.setLOCATIONS(gps);
+                DBManger.getInstance(this).insertStep(entity);
+            } else {
+                int lastStep = Integer.parseInt(entity.getSTEP_NUM());
+                if (CURRENT_STEP != lastStep){
+                    //有则更新当前的数据
+                    entity.setSTEP_NUM(String.valueOf(CURRENT_STEP));
+                    String location = entity.getLOCATIONS();
+                    String temp = location +"-"+gps;
+                    entity.setLOCATIONS(temp);
+                    DBManger.getInstance(this).updateStep(entity);
+                }
+            }
         }
-        builder.setContentIntent(PendingIntent.getActivity(this, 0, nfIntent, 0)) // 设置PendingIntent
-                .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.mipmap.ic_launcher)) // 设置下拉列表中的图标(大图标)
-                .setContentTitle("今日步数"+CURRENT_STEP+"步") // 设置下拉列表里的标题
-                .setSmallIcon(R.mipmap.ic_launcher) // 设置状态栏内的小图标
-                .setContentText("加油，要记得勤加运动"); // 设置上下文内容　
-        // 获取构建好的Notification
-        Notification stepNotification = builder.build();
-        //调用更新
-        notificationManager.notify(110,stepNotification);
+
     }
     @Override
     public void onDestroy() {
