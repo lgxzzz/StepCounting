@@ -2,6 +2,10 @@ package com.step.counting.chart;
 
 import com.github.mikephil.charting.charts.BarLineChartBase;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.step.counting.bean.Step;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by philipp on 02/06/16.
@@ -9,12 +13,8 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 public class DayAxisValueFormatter extends ValueFormatter
 {
 
-    private final String[] mDays = new String[]{
-            "1号","2号","3号","4号","5号","6号","7号","8号","9号","10号",
-            "11号","12号","13号","14号","15号","16号","17号","18号","19号","20号",
-            "21号","22号","23号","24号","25号","26号","27号","28号","29号","30号",
-            "31号"
-    };
+    public List<Step> mSteps = new ArrayList<>();
+
 
     private final BarLineChartBase<?> chart;
 
@@ -25,9 +25,20 @@ public class DayAxisValueFormatter extends ValueFormatter
     @Override
     public String getFormattedValue(float value) {
         float visible = chart.getVisibleXRange();
-      return mDays[((int)value)];
+        int index = ((int)value);
+        if (index>mSteps.size()){
+            index = mSteps.size()-1;
+        }
+        String date = mSteps.get(index).getDATE().split("月")[1];
+      return date;
 
     }
 
+    public List<Step> getmSteps() {
+        return mSteps;
+    }
 
+    public void setmSteps(List<Step> mSteps) {
+        this.mSteps = mSteps;
+    }
 }

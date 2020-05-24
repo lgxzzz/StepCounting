@@ -92,8 +92,6 @@ public class LoginActivity extends Activity implements View.OnClickListener{
                 DBManger.getInstance(LoginActivity.this).login(mName, mPassWord, new DBManger.IListener() {
                     @Override
                     public void onSuccess() {
-                        User user = DBManger.getInstance(getBaseContext()).mUser;
-                        Toast.makeText(LoginActivity.this,"登陆成功,当前身份："+user.getRole(),Toast.LENGTH_LONG).show();
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         LoginActivity.this.finish();
                     }

@@ -90,14 +90,14 @@ public class HistoryFragment extends Fragment {
 
         // chart.setDrawYLabels(false);
         chart.setMaxVisibleValueCount(mSteps.size());
-        ValueFormatter xAxisFormatter = new DayAxisValueFormatter(chart);
-
+        DayAxisValueFormatter xAxisFormatter = new DayAxisValueFormatter(chart);
+        xAxisFormatter.setmSteps(mSteps);
         XAxis xAxis = chart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setTypeface(tfLight);
         xAxis.setDrawGridLines(false);
         xAxis.setGranularity(1f); // only intervals of 1 day
-        xAxis.setLabelCount(7);
+        xAxis.setLabelCount(8);
         xAxis.setValueFormatter(xAxisFormatter);
 
         ValueFormatter custom = new MyValueFormatter("步");

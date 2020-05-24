@@ -22,6 +22,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.amap.api.maps.model.LatLng;
 import com.step.counting.bean.Step;
@@ -234,19 +235,21 @@ public class StepService extends Service implements SensorEventListener {
     public void onSensorChanged(SensorEvent event) {
         if (stepSensor == 0) {
             int tempStep = (int) event.values[0];
-            if (!hasRecord) {
-                hasRecord = true;
-                hasStepCount = tempStep;
-            } else {
-                int thisStepCount = tempStep - hasStepCount;
-                CURRENT_STEP += (thisStepCount - previousStepCount);
-                previousStepCount = thisStepCount;
-            }
+//            if (!hasRecord) {
+//                hasRecord = true;
+//                hasStepCount = tempStep;
+//            } else {
+//                int thisStepCount = tempStep - hasStepCount;
+//                CURRENT_STEP += (thisStepCount - previousStepCount);
+//                previousStepCount = thisStepCount;
+//            }
+            CURRENT_STEP = tempStep;
         } else if (stepSensor == 1) {
             if (event.values[0] == 1.0) {
                 CURRENT_STEP++;
             }
         }
+        Log.e("lgx","onSensorChanged:CURRENT_STEP"+CURRENT_STEP);
     }
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -287,27 +290,30 @@ public class StepService extends Service implements SensorEventListener {
         LatLng position = locationMgr.getmCurrentPosition();
         if (position!=null){
             String gps = position.latitude+","+position.longitude;
-            //查询数据库中的数据
-            Step entity = DBManger.getInstance(this).getStepByDate(CURRENT_DATE);
-            //为空则说明还没有该天的数据，有则说明已经开始当天的计步了
-            if (entity == null) {
-                //没有则新建一条数据
-                entity = new Step();
-                entity.setDATE(CURRENT_DATE);
-                entity.setSTEP_NUM(String.valueOf(CURRENT_STEP));
-                entity.setLOCATIONS(gps);
-                DBManger.getInstance(this).insertStep(entity);
-            } else {
-                int lastStep = Integer.parseInt(entity.getSTEP_NUM());
-                if (CURRENT_STEP != lastStep){
-                    //有则更新当前的数据
+            if (!gps.equals("0.0,0.0")){
+                //查询数据库中的数据
+                Step entity = DBManger.getInstance(this).getStepByDate(CURRENT_DATE);
+                //为空则说明还没有该天的数据，有则说明已经开始当天的计步了
+                if (entity == null) {
+                    //没有则新建一条数据
+                    entity = new Step();
+                    entity.setDATE(CURRENT_DATE);
                     entity.setSTEP_NUM(String.valueOf(CURRENT_STEP));
-                    String location = entity.getLOCATIONS();
-                    String temp = location +"-"+gps;
-                    entity.setLOCATIONS(temp);
-                    DBManger.getInstance(this).updateStep(entity);
+                    entity.setLOCATIONS(gps);
+                    DBManger.getInstance(this).insertStep(entity);
+                } else {
+                    int lastStep = Integer.parseInt(entity.getSTEP_NUM());
+                    if (CURRENT_STEP != lastStep){
+                        //有则更新当前的数据
+                        entity.setSTEP_NUM(String.valueOf(CURRENT_STEP));
+                        String location = entity.getLOCATIONS();
+                        String temp = location +"-"+gps;
+                        entity.setLOCATIONS(temp);
+                        DBManger.getInstance(this).updateStep(entity);
+                    }
                 }
             }
+
         }
 
     }

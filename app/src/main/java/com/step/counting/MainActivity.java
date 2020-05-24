@@ -1,8 +1,13 @@
 package com.step.counting;
 
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -11,6 +16,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +28,8 @@ import com.step.counting.fragement.AboutFragment;
 import com.step.counting.fragement.HistoryFragment;
 import com.step.counting.fragement.TodayFragment;
 import com.step.counting.util.FragmentUtils;
+
+import java.io.FileNotFoundException;
 
 /***
  * */
@@ -36,7 +44,7 @@ public class MainActivity extends BaseActivtiy {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        requestPermissions();
         init();
 
         bind();
@@ -138,5 +146,33 @@ public class MainActivity extends BaseActivtiy {
                 break;
         }
     }
+
+    private void requestPermissions(){
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                int permission = ActivityCompat.checkSelfPermission(this,
+                        Manifest.permission.ACTIVITY_RECOGNITION);
+                if(permission!= PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this,new String[]
+                            {Manifest.permission.ACTIVITY_RECOGNITION, Manifest.permission.ACCESS_COARSE_LOCATION,
+                                    Manifest.permission.ACCESS_FINE_LOCATION},0x0010);
+                }
+
+                if(permission != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this,new String[] {
+                            Manifest.permission.ACTIVITY_RECOGNITION, Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION},0x0010);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
 
 }

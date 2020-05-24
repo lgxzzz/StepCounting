@@ -137,29 +137,6 @@
 
         </EditText>
     </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="10dp"
-        >
-        <TextView
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:text="角色:"
-            android:layout_marginLeft="5dp"
-            android:textColor="@android:color/black"
-            android:textSize="25dp"
-            >
-
-        </TextView>
-        <Spinner
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/user_role"
-            />
-    </LinearLayout>
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

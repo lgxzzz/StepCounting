@@ -78,46 +78,60 @@ public class TodayFragment extends Fragment {
         mMapView.onCreate(savedInstanceState);
         mAMap = mMapView.getMap();
 
-        mHandler.sendEmptyMessageDelayed(HSG_UI_REFRESH,1000*10);
+        mHandler.sendEmptyMessageDelayed(HSG_UI_REFRESH,0);
+        mHandler.sendEmptyMessageDelayed(HSG_MAP_REFRESH,0);
     };
 
     /**
      * 绘制运动路线
      */
     public void drawLines(Step mTodayStep) {
-        mAMap.clear();
-        String locations = mTodayStep.getLOCATIONS();
-        String[] gpsData = locations.split("-");
-        ArrayList<LatLng> latlngList_path = new ArrayList<LatLng>();
-        for (int i = 0;i<gpsData.length;i++){
-            String[] gps = gpsData[i].split(",");
-            double lat = Double.parseDouble(gps[0]);
-            double lon = Double.parseDouble(gps[1]);
-            LatLng latLng = new LatLng(lat,lon);
-            latlngList_path.add(latLng);
-        }
-        if (latlngList_path.size()>0){
-            PolylineOptions options = new PolylineOptions();
-            options.addAll(latlngList_path);
-            options.width(10).geodesic(true).color(Color.GREEN);
-            mAMap.addPolyline(options);
+        if (mTodayStep!=null){
+            mAMap.clear();
+            String locations = mTodayStep.getLOCATIONS();
+            String[] gpsData = locations.split("-");
+            ArrayList<LatLng> latlngList_path = new ArrayList<LatLng>();
+            for (int i = 0;i<gpsData.length;i++){
+                String[] gps = gpsData[i].split(",");
+                double lat = Double.parseDouble(gps[0]);
+                double lon = Double.parseDouble(gps[1]);
+                LatLng latLng = new LatLng(lat,lon);
+                latlngList_path.add(latLng);
+            }
+            if (latlngList_path.size()>0){
+                PolylineOptions options = new PolylineOptions();
+                options.addAll(latlngList_path);
+                options.width(10).geodesic(true).color(Color.GREEN);
+                mAMap.addPolyline(options);
 
-            LatLng latLng = latlngList_path.get(0);
-            mAMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latLng.latitude, latLng.longitude), 15));
+                LatLng latLng = latlngList_path.get(0);
+                mAMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latLng.latitude, latLng.longitude), 15));
+            }
         }
+
 
     }
 
     public static final int HSG_UI_REFRESH = 1;
+    public static final int HSG_MAP_REFRESH = 2;
     Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
             switch (msg.what){
                 case HSG_UI_REFRESH:
                     mTodayStep = DBManger.getInstance(getContext()).getStepByDate(DateUtil.getCurrentDayStr());
-                    drawLines(mTodayStep);
-                    mTodayTv.setText("今日步数："+ MainActivity.mCurrentSteps);
-                    mHandler.sendEmptyMessageDelayed(HSG_UI_REFRESH,1000*10);
+                    if (mTodayStep!=null){
+                        drawLines(mTodayStep);
+                        mTodayTv.setText("今日步数："+ mTodayStep.getSTEP_NUM());
+                        mHandler.sendEmptyMessageDelayed(HSG_UI_REFRESH,1000*2);
+                    }
+                    break;
+                case HSG_MAP_REFRESH:
+                    mTodayStep = DBManger.getInstance(getContext()).getStepByDate(DateUtil.getCurrentDayStr());
+                    if (mTodayStep!=null){
+                        drawLines(mTodayStep);
+                        mHandler.sendEmptyMessageDelayed(HSG_MAP_REFRESH,1000*10);
+                    }
                     break;
             }
             return false;
